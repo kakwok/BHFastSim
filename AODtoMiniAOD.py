@@ -4,6 +4,7 @@
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
 # with command line options: step3 --conditions MCRUN2_74_V9 --fast -n 10 --eventcontent MINIAODSIM --runUnscheduled --filein file:fastsim.root -s PAT --datatier MINIAODSIM --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1 --mc
 import FWCore.ParameterSet.Config as cms
+import FWCore.ParameterSet.VarParsing as VarParsing
 
 process = cms.Process('PAT')
 
@@ -18,15 +19,52 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 
+process.MessageLogger = cms.Service("MessageLogger",
+                            destinations   = cms.untracked.vstring('messages')
+)
+#------------------------------------------------------------------------------------
+# Options
+#------------------------------------------------------------------------------------
+
+options = VarParsing.VarParsing()
+options.register('InputFile',
+		"file:input.lhe",
+		VarParsing.VarParsing.multiplicity.singleton,
+		VarParsing.VarParsing.varType.string,
+		"filename of LHE")
+
+
+options.parseArguments()
+
+#fname = options.InputFile.split("/")
+#OutputFile = fname[len(fname)-2]+"_miniAOD.root"
+
+fname  = options.InputFile
+OutputFile = fname.replace("_AOD.root","_miniAOD.root")
+print "Input AOD =", options.InputFile
+print "Onput MiniAOD =", OutputFile
+
+#------------------------------------------------------------------------------------
+
+
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
 )
-
+#process.maxLuminosityBlocks = cms.untracked.PSet(
+#    input = cms.untracked.int32(-1)
+#)
 # Input source
 process.source = cms.Source("PoolSource",
 #    fileNames = cms.untracked.vstring('file:BlackMaxLHArecord_BH1_BM_MD4000_MBH5000_n2.root'),
 #    fileNames = cms.untracked.vstring('file:/afs/cern.ch/work/t/tutanon/BH2015/CMSSW_7_4_4/src/SignalGeneration/FixedBlackMaxAOD/BlackMaxLHArecord_BH1_BM_MD4000_MBH5000_n2.root'),
-    fileNames = cms.untracked.vstring('file:/afs/cern.ch/user/k/kakwok/work/public/CMSSW_7_4_4/src/Blackhole/FastSim/BH6_CH_MD2000_MBH6000_n2.root'),
+#    fileNames = cms.untracked.vstring('/afs/cern.ch/user/k/kakwok/eos/cms/store/user/kakwok/CRAB_PrivateMC/crab_BHFastSim_LHEtoAOD_BH6_CH_MD3000_MBH6000_n2/160701_162952/0000/*.root')
+#    fileNames = cms.untracked.vstring('root://eoscms//eos/cms/store/user/kakwok/CRAB_PrivateMC/crab_BHFastSim_LHEtoAOD_BH6_CH_MD3000_MBH6000_n2/160701_162952/0000/*.root')
+
+    processingMode =cms.untracked.string("RunsLumisAndEvents"),
+     fileNames = cms.untracked.vstring(
+	 options.InputFile
+    ),
+    setRunNumber = cms.untracked.uint32(1),
     secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -53,7 +91,8 @@ process.MINIAODSIMoutput = cms.OutputModule("PoolOutputModule",
     dropMetaData = cms.untracked.string('ALL'),
     eventAutoFlushCompressedSize = cms.untracked.int32(15728640),
     fastCloning = cms.untracked.bool(False),
-    fileName = cms.untracked.string('BH6_CH_MD2000_MBH6000_n2_MiniAOD.root'),
+    fileName = cms.untracked.string('BH6_CH_MD3000_MBH6000_n2_MiniAOD.root'),
+#    fileName = cms.untracked.string(OutputFile),
     outputCommands = process.MINIAODSIMEventContent.outputCommands,
     overrideInputFileSplitLevels = cms.untracked.bool(True)
 )
