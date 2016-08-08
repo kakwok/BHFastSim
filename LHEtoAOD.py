@@ -31,26 +31,34 @@ process.load('HLTrigger.Configuration.HLT_25ns14e33_v1_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 
-#------------------------------------------------------------------------------------
-# Options
-#------------------------------------------------------------------------------------
+##------------------------------------------------------------------------------------
+## Options
+##------------------------------------------------------------------------------------
+#
+#options = VarParsing.VarParsing()
+#options.register('InputFile',
+#		"file:input.lhe",
+#		VarParsing.VarParsing.multiplicity.singleton,
+#		VarParsing.VarParsing.varType.string,
+#		"filename of LHE")
+#
+#
+#options.parseArguments()
+#
+#fname = options.InputFile.split("/")
+#OutputFile = fname[len(fname)-2]+"_AOD.root"
+#
+##------------------------------------------------------------------------------------
 
-options = VarParsing.VarParsing()
-options.register('InputFile',
-		"file:input.lhe",
-		VarParsing.VarParsing.multiplicity.singleton,
-		VarParsing.VarParsing.varType.string,
-		"filename of LHE")
+PathAndName     = "BH10_fixed.xml"
+InputFile       = "file:"+PathAndName
+flist           = PathAndName.split("/")
+fname           = flist[len(flist)]
 
+OutputFile = fname.replace(".xml","")+"_AOD.root"
 
-options.parseArguments()
-
-fname = options.InputFile.split("/")
-OutputFile = fname[len(fname)-2]+"_AOD.root"
 print "Input LHE =", options.InputFile
 print "Onput AOD =", OutputFile
-
-#------------------------------------------------------------------------------------
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
@@ -60,9 +68,7 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("LHESource",
 #   fileNames = cms.untracked.vstring('root://eoscms.cern.ch//eos/cms/store/user/tutanon/BH2015/LHE/BlackMaxn4/BH2_BM_MD2000_MBH10000_n4/BlackMaxLHArecord.lhe') 
 #   fileNames = cms.untracked.vstring('file:/afs/cern.ch/user/b/belotel/work/public/BH/BH6_CH_MD2000_MBH6000_n2/lhouches.xml') 
-    fileNames = cms.untracked.vstring(
-	 options.InputFile
-    )
+   fileNames = cms.untracked.vstring(InputFile) 
 )
 
 process.options = cms.untracked.PSet(
@@ -114,6 +120,7 @@ process.generator = cms.EDFilter("Pythia8HadronizerFilter",
             'MultipartonInteractions:expPow=1.6'),
         pythia8CommonSettings = cms.vstring('Tune:preferLHAPDF = 2', 
             'Main:timesAllowErrors = 10000', 
+	    'Next:numberShowLHA = 10',
             'Check:epTolErr = 0.01', 
             'Beams:setProductionScalesFromLHEF = off', 
             'SLHA:keepSM = on', 
@@ -124,7 +131,7 @@ process.generator = cms.EDFilter("Pythia8HadronizerFilter",
     ),
     comEnergy = cms.double(13000.0),
     filterEfficiency = cms.untracked.double(1.0),
-    maxEventsToPrint = cms.untracked.int32(1),
+    maxEventsToPrint = cms.untracked.int32(10),
     pythiaHepMCVerbosity = cms.untracked.bool(False),
     pythiaPylistVerbosity = cms.untracked.int32(1)
 )
