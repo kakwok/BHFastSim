@@ -4,7 +4,7 @@ import subprocess
 inputlist=open("LHElist.txt","r")
 
 for line in inputlist:
-  if(not line[0]=="#"):
+  if(not line[0]=="#" and len(line)>1):
 	cmd = "python makeAndSubmitOneCrab.py %s"%line
 	print cmd
 	system(cmd)
