@@ -64,8 +64,11 @@ p1p2       = []
 
 file = open(argv[1],"r")
 
-ListOfInput = argv[1].split("/")
-fname = ListOfInput[len(ListOfInput)-1].replace(".xml","_fixed.xml")
+if len(argv)==2:
+	ListOfInput = argv[1].split("/")
+	fname = ListOfInput[len(ListOfInput)-1].replace(".xml","_fixed.xml")
+else:
+	fname = argv[2] 
 FixedLHE = open(fname,"w")
 
 print "Going to replace pids in the following LHE: %s"%argv[1]
